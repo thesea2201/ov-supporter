@@ -1,0 +1,30 @@
+{
+    "manifest_version": 3,
+    "name": "OV supporter",
+    "description": "OV supporter",
+    "version": "1.0.0",
+    "permissions": [
+        "cookies",
+        "activeTab",
+        "storage",
+        "webNavigation"
+    ],
+    "action": {
+        "default_icon": {
+            "16": "images/logo16.png",
+            "24": "images/logo24.png",
+            "32": "images/logo32.png"
+        },
+        "default_popup": "popup.html"
+    },
+    "host_permissions": ["<all_urls>"],
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": [
+                "js/content.js"
+            ],
+            "run_at": "document_end"
+        }
+    ]
+}

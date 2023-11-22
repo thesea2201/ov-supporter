@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OV supporter Extension</title>
+    <link rel="stylesheet" href="css/popup.css" />
+  </head>
+
+  <body>
+    <div id="loading" style="display: none" class="loader">
+      <div class="loader-inner">
+        <div class="loader-line-wrap">
+          <div class="loader-line"></div>
+        </div>
+        <div class="loader-line-wrap">
+          <div class="loader-line"></div>
+        </div>
+        <div class="loader-line-wrap">
+          <div class="loader-line"></div>
+        </div>
+        <div class="loader-line-wrap">
+          <div class="loader-line"></div>
+        </div>
+        <div class="loader-line-wrap">
+          <div class="loader-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create div for error message -->
+    <div id="error" class="error"></div>
+
+    <div id="popup" class="background">
+      <div class="first-line">
+        <p id="space-size"></p>
+        <button id="reset" class="btn danger-btn" title="Reset to default">
+          Reset
+        </button>
+        <!-- <button id="set-default" class="btn success-btn" title="Set current configuration is default">Set default</button> -->
+      </div>
+      <div class="diligence">
+        <p>Notification:</p>
+        <ul id="diligence"></ul>
+      </div>
+      <hr />
+      <div class="options">
+        <div class="checkbox-wrapper-1">
+          <input
+            id="hide-notification"
+            class="substituted"
+            type="checkbox"
+            aria-hidden="true"
+          />
+          <label for="hide-notification">Hide notification</label>
+        </div>
+
+        <hr />
+        <div class="checkbox-wrapper-1">
+          <input
+            id="hide-rooms"
+            class="substituted"
+            type="checkbox"
+            aria-hidden="true"
+          />
+          <label for="hide-rooms">Hide rooms</label>
+          <div>
+            <label for="except-room">Except room(separated by comma):</label>
+            <input id="except-room" type="text" />
+          </div>
+        </div>
+
+        <hr />
+        <div class="checkbox-wrapper-1">
+          <input
+            id="auto-join-room"
+            class="substituted"
+            type="checkbox"
+            aria-hidden="true"
+          />
+          <label for="auto-join-room">Auto-join room</label>
+          <div>
+            <label for="auto-join-room-name">Room name(only 1 room):</label>
+            <input id="auto-join-room-name" type="text" />
+          </div>
+        </div>
+
+        <hr />
+        <div>
+          <div>
+            <label for="tags">Tags (separated by comma):</label>
+            <input type="text" id="tags" placeholder="beach,motivation" />
+          </div>
+          <div>
+            <button id="change-bg" class="btn button-3">
+              Change background
+            </button>
+          </div>
+          <div>
+            <span id="more-options">Or click for more options ↵</span>
+          </div>
+          <div id="bg-options" class="collapsible">
+            <div>
+              <input
+                type="file"
+                id="upload-bg"
+                accept="image/*"
+                class="custom-file-input"
+              />
+            </div>
+            <span>Or</span>
+            <div>
+              <label for="bg-link">Paste your image link here:</label>
+              <input type="text" id="bg-link" placeholder="https://..." />
+            </div>
+          </div>
+        </div>
+
+        <div class="checkbox-wrapper-1">
+          <input
+            id="keep-bg"
+            class="substituted"
+            type="checkbox"
+            aria-hidden="true"
+          />
+          <label for="keep-bg">Keep the last background</label>
+        </div>
+
+        <hr />
+      </div>
+    </div>
+    <script src="js/popup.js"></script>
+  </body>
+</html>
