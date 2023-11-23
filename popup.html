@@ -39,10 +39,10 @@
         </button>
         <!-- <button id="set-default" class="btn success-btn" title="Set current configuration is default">Set default</button> -->
       </div>
-      <div class="diligence">
+      <!-- <div class="diligence">
         <p>Notification:</p>
         <ul id="diligence"></ul>
-      </div>
+      </div> -->
       <hr />
       <div class="options">
         <div class="checkbox-wrapper-1">
@@ -66,24 +66,41 @@
           <label for="hide-rooms">Hide rooms</label>
           <div>
             <label for="except-room">Except room(separated by comma):</label>
-            <input id="except-room" type="text" />
+            <input id="except-room" placeholder="admin,c01" type="text" />
           </div>
         </div>
 
         <hr />
+        <!-- Start auto join room section -->
         <div class="checkbox-wrapper-1">
-          <input
-            id="auto-join-room"
-            class="substituted"
-            type="checkbox"
-            aria-hidden="true"
-          />
-          <label for="auto-join-room">Auto-join room</label>
-          <div>
-            <label for="auto-join-room-name">Room name(only 1 room):</label>
-            <input id="auto-join-room-name" type="text" />
+          <div class="inline auto-join-room">
+            <div>
+              <input
+                id="auto-join-room"
+                class="substituted"
+                type="checkbox"
+                aria-hidden="true"
+              />
+              <label for="auto-join-room">Auto-join room. After </label>
+              <!-- after seconds -->
+              <input id="delay-auto-join" class="delay-ipt" type="number" />
+              <label for="delay-auto-join">second(s)</label>
+            </div>
+          </div>
+          <div class="inline">
+            <div>
+              <label for="auto-join-room-name">Room name(only 1 room):</label>
+              <input id="auto-join-room-name" placeholder="admin" type="text" />
+            </div>
+
+            <div class="counter">
+              <label id="countdown" for="count-down" class="countdown hide"></label>
+              <!-- <button id="pause-counter" class="btn pause hide">Pause</button>
+              <button id="restart-counter" class="btn pause hide">Restart</button> -->
+            </div>
           </div>
         </div>
+        <!-- End auto join room section -->
 
         <hr />
         <div>

@@ -1,11 +1,12 @@
 const defaultOptions = {
     "hide-notification": false,
     "hide-rooms": false,
-    "except-room": "admin",
+    "except-room": "",
     "auto-join-room": false,
     "auto-join-room-name": "",
+    "delay-auto-join": 5,
     "keep-background": true,
-    "tags": "beach",
+    "tags": "",
     "origin-bg": "",
     "background": "",
     "width": 1200,
@@ -15,7 +16,7 @@ const options = { ...defaultOptions };
 
 let loading = document.getElementById('loading');
 let errorElm = document.getElementById('error');
-let timeOutEvent;
+let errorTimeoutEvent;
 
 let spaceSizeP = document.getElementById('space-size');
 let resetBtn = document.getElementById('reset');
@@ -26,6 +27,11 @@ let exceptRoomIpt = document.getElementById('except-room');
 
 let autoJoinRoomIpt = document.getElementById('auto-join-room');
 let autoJoinRoomNameIpt = document.getElementById('auto-join-room-name');
+let delayAutoJoinIpt = document.getElementById('delay-auto-join');
+let countdownElm = document.getElementById('countdown');
+// let pauseCounterBtn = document.getElementById('pause-counter');
+// let restartCounterBtn = document.getElementById('restart-counter');
+let countdownTimeOutEvent;
 
 let tagIpt = document.getElementById('tags');
 let changeImgBtn = document.getElementById('change-bg');
@@ -93,13 +99,16 @@ roomsIpt.addEventListener('change', (e) => {
     })
 })
 
-autoJoinRoomIpt.addEventListener('change', (e) => {
+autoJoinRoomIpt.addEventListener('click', (e) => {
+    console.log('auto-join-room:' + e.currentTarget.checked);
     let isChecked = e.currentTarget.checked;
 
     setStatus('auto-join-room', isChecked);
 
     if (isChecked) {
-        joinRoom(options["auto-join-room-name"]);
+        restartJoinRoom();
+    } else {
+        pauseJoinRoom();
     }
 
 
@@ -107,6 +116,7 @@ autoJoinRoomIpt.addEventListener('change', (e) => {
 
 ['keypress', 'focusout'].forEach((event) => {
     autoJoinRoomNameIpt.addEventListener(event, (e) => {
+        console.log('auto-join-room-name:' + event + autoJoinRoomNameIpt.value);
         setStatus('auto-join-room-name', autoJoinRoomNameIpt.value);
         if (
             options["auto-join-room"] &&
@@ -116,6 +126,20 @@ autoJoinRoomIpt.addEventListener('change', (e) => {
         }
     })
 });
+
+['keypress', 'focusout'].forEach((event) => {
+    delayAutoJoinIpt.addEventListener(event, (e) => {
+        setStatus('delay-auto-join', delayAutoJoinIpt.value);
+    })
+});
+
+// pauseCounterBtn.addEventListener('click', (e) => {
+//     pauseJoinRoom();
+// });
+
+// restartCounterBtn.addEventListener('click', (e) => {
+//     restartJoinRoom();
+// });
 
 tagIpt.addEventListener('keypress', (e) => {
     setStatus('tags', tagIpt.value.replaceAll(' ', ''));
@@ -166,7 +190,7 @@ keepBGIpt.addEventListener('change', (e) => {
 
 // Functions
 
-function init(items) {
+let init = (items) => {
     console.log(items);
     Object.assign(options, items);
 
@@ -185,7 +209,7 @@ function init(items) {
     initBackground(isDelay);
 }
 
-function initElm() {
+let initElm = () => {
     notificationIpt.checked = options['hide-notification'];
     roomsIpt.checked = options['hide-rooms'];
 
@@ -193,12 +217,19 @@ function initElm() {
 
     autoJoinRoomIpt.checked = options['auto-join-room'];
     autoJoinRoomNameIpt.value = options['auto-join-room-name'];
+    delayAutoJoinIpt.value = options['delay-auto-join'];
+
+    if (options['auto-join-room'] && options['delay-auto-join'] > 0) {
+        countdownElm.classList.remove('hide');
+        // pauseCounterBtn.classList.remove('hide');
+        // restartCounterBtn.classList.add('hide');
+    }
 
     tagIpt.value = options['tags'];
     keepBGIpt.checked = options['keep-background'];
 }
 
-function initNotification() {
+let initNotification = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'notification', text: options['hide-notification'] ? 'hide' : 'show' }, (response) => {
             console.log('message sent', response);
@@ -206,18 +237,24 @@ function initNotification() {
     })
 }
 
-function initRoom() {
+let initRoom = () => {
     hideRooms();
 }
 
-function initAutoJoinRoom() {
-    if (options['auto-join-room']) {
-        setTimeout(() => {
-            joinRoom(options["auto-join-room-name"]);
-        }, 200);
+let initAutoJoinRoom = () => {
+    let roomName = options["auto-join-room-name"];
+
+    if (roomName) {
+        testJoinRoom(roomName);
+
+        if (options['auto-join-room']) {
+            let delay = options['delay-auto-join'];
+            initJoinCounter(delay);
+            joinRoomWithDelay(roomName, delay);
+        }
     }
 }
-function initBackground(isDelay) {
+let initBackground = (isDelay) => {
     let delayInMiliSec = 200;
     if (options['keep-background']) {
         if (isDelay) {
@@ -235,7 +272,7 @@ function initBackground(isDelay) {
     }
 }
 
-function setStatus(name, value) {
+let setStatus = (name, value) => {
     if (name) {
         options[name] = value;
     }
@@ -243,24 +280,24 @@ function setStatus(name, value) {
     chrome.storage.local.set(options);
 }
 
-function getStatus(name, value) {
+let getStatus = (name, value) => {
     return options[name] ? options[name] : value;
 }
 
-function showError(text, timeOutInSeconds) {
+let showError = (text, timeOutInSeconds) => {
     timeOutInSeconds = timeOutInSeconds ? timeOutInSeconds : 5;
     errorElm.innerText = text;
 
-    if (timeOutEvent) {
-        clearTimeout(timeOutEvent);
+    if (errorTimeoutEvent) {
+        clearTimeout(errorTimeoutEvent);
     }
 
-    timeOutEvent = setTimeout(() => {
+    errorTimeoutEvent = setTimeout(() => {
         errorElm.innerText = '';
     }, timeOutInSeconds * 1000);
 }
 
-function hideRooms() {
+let hideRooms = () => {
     let text = 'hideAll';
     if (options['except-room']) {
         text = `hide-except:${options['except-room']}`;
@@ -276,30 +313,95 @@ function hideRooms() {
     })
 }
 
-function joinRoom(roomName) {
+let joinRoom = (roomName) => {
+    clearTimeout(countdownTimeOutEvent);
     initRoom();
 
     if (!roomName) {
         return;
     }
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'auto-join-room', text: roomName }, (response) => {
-            if (response.status == 'fail') {
-                showError(response.text, 5);
-            } else {
-                console.log('message sent', response);
-            }
-        })
-    })
+
+    let data = {
+        action: 'auto-join-room',
+        text: roomName
+    };
+
+    sendMessageChrome(data);
 }
 
-function changeBG(background) {
+let testJoinRoom = (roomName) => {
+    let data = {
+        action: 'test-auto-join-room',
+        text: roomName
+    };
+
+    sendMessageChrome(data);
+}
+
+let joinRoomWithDelay = (roomName, delay) => {
+    if (!roomName) {
+        return;
+    }
+
+    let data = {
+        action: 'auto-join-room-with-delay',
+        text: roomName,
+        delay: delay
+    }
+
+    sendMessageChrome(data);
+}
+
+let initJoinCounter = (delay) => {
+    countdownElm.innerText = delay;
+    startCounter(delay);
+};
+
+let startCounter = (remaining) => {
+    countdownTimeOutEvent = setTimeout(() => {
+        if (remaining > 0) {
+            remaining = remaining - 1;
+            countdownElm.innerText = remaining;
+            startCounter(remaining);
+        } else {
+            countdownElm.classList.add('hide');
+        }
+    }, 1000)
+}
+
+
+let pauseJoinRoom = () => {
+    // pauseCounterBtn.classList.add('hide');
+    // restartCounterBtn.classList.remove('hide');
+    // countdownElm.classList.remove('hide');
+
+    clearTimeout(countdownTimeOutEvent);
+    let roomName = options['auto-join-room-name'];
+    if (!roomName) {
+        return;
+    }
+
+    let data = {
+        action: 'pause-auto-join-room',
+    };
+
+    sendMessageChrome(data);
+}
+
+let restartJoinRoom = () => {
+    // restartCounterBtn.classList.add('hide');
+    // pauseCounterBtn.classList.remove('hide');
+    countdownElm.classList.remove('hide');
+    initAutoJoinRoom();
+}
+
+let changeBG = (background) => {
     if (background) {
         sendMessageChangeBG(background);
     } else {
         showLoading();
 
-        let tags = tagIpt.value ? tagIpt.value : 'beach,motivation';
+        let tags = options['tags'];
         setStatus('tags', tags);
         let width = options['width'];
         let height = options['height'];
@@ -319,7 +421,7 @@ function changeBG(background) {
 
 }
 
-function sendMessageChangeBG(url) {
+let sendMessageChangeBG = (url) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'change-img', text: url }, (response) => {
             console.log('message sent', response);
@@ -327,15 +429,15 @@ function sendMessageChangeBG(url) {
     })
 }
 
-function hideLoading() {
+let hideLoading = () => {
     loading.style.display = 'none';
 }
 
-function showLoading() {
+let showLoading = () => {
     loading.style.display = 'inherit';
 }
 
-function getWindowSize() {
+let getWindowSize = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'openspace', text: 'windowSize' }, (response) => {
             console.log(response);
@@ -352,10 +454,28 @@ function getWindowSize() {
     })
 }
 
-function resetOptionsToDefault() {
+let resetOptionsToDefault = () => {
     let originBG = options['origin-bg'];
     Object.assign(options, defaultOptions);
     options['origin-bg'] = originBG;
     options['background'] = originBG;
     setStatus();
+}
+
+let sendMessageChrome = async (data) => {
+    await chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, data, (response) => {
+            if (response && response.status === 'fail') {
+                showError(response.text);
+                console.log(response.error_action);
+                if (response.error_action === 'deleteAutoJoinRoomTimeoutEvent') {
+                    console.log('deleteAutoJoinRoomTimeoutEvent');
+                    countdownElm.classList.add('hide');
+                    clearTimeout(countdownTimeOutEvent);
+                }
+            } else {
+                console.log('message sent', response);
+            }
+        })
+    })
 }

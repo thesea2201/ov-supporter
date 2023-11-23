@@ -1,36 +1,57 @@
-console.log('content started');
+console.log('ov-supporter, content started');
+
+let autoJoinTimeOutEvent;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log('ov-supporter', request);
+    let result = {
+        status: 'success',
+        action: request.action,
+        text: request.text
+    };
     if (request.action === 'notification') {
         if (request.text == 'hide') {
             hideNotification(true);
         } else {
             hideNotification(false);
         }
-        sendResponse({ status: 'success', action: request.action, text: request.text });
+        sendResponse(result);
     }
 
     if (request.action === 'rooms') {
         hideRoomElements(request.text);
-        sendResponse({ status: 'success', action: request.action, text: request.text });
+        sendResponse(result);
     }
 
     if (request.action === 'change-img') {
-        console.log(request.text);
         changeBG(request.text);
-        sendResponse({ status: 'success', action: request.action, text: request.text });
+        sendResponse(result);
     }
 
     if (request.action === 'openspace') {
         if (request.text == 'windowSize') {
             let result = getWindowSize();
-            console.log(result);
             sendResponse(result);
         }
     }
 
-    if (request.action = 'auto-join-room') {
-        let result = joinRoom(request.text);
+    if (request.action === 'test-auto-join-room') {
+        let result = c_joinRoom(request.text, true);
+        sendResponse(result);
+    }
+
+    if (request.action === 'auto-join-room') {
+        let result = c_joinRoom(request.text);
+        sendResponse(result);
+    }
+
+    if (request.action === 'auto-join-room-with-delay') {
+        let result = joinRoomWithDelay(request.text, request.delay);
+        sendResponse(result);
+    }
+
+    if (request.action === 'pause-auto-join-room') {
+        clearTimeout(autoJoinTimeOutEvent);
         sendResponse(result);
     }
 
@@ -39,7 +60,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 function getWindowSize() {
     let openSpace = document.getElementById('openspace');
 
-    console.log(openSpace);
     return {
         width: openSpace.parentElement.offsetWidth,
         height: openSpace.parentElement.offsetHeight,
@@ -62,7 +82,6 @@ function hideRoomElements(status) {
     let body = document.body;
     let rooms = body.querySelectorAll('.MuiGrid-container');
 
-    console.log(status);
     let isHide = (status == 'hideAll' || status.includes('hide-except:')) ? true : false;
 
     rooms.forEach(room => {
@@ -83,17 +102,16 @@ function hideRoomElements(status) {
 
 }
 
-function joinRoom(roomName) {
+let c_joinRoom = (roomName, isTestFirst) => {
     let result = {
         status: 'success',
         action: 'auto-join-room',
-        text: roomName
+        text: roomName,
+        error_action: '',
     };
     let body = document.body;
     let rooms = body.querySelectorAll('.MuiGrid-container');
     let filteredRoom = [];
-
-    console.log(roomName);
 
     rooms.forEach(r => {
         if (r.parentElement.textContent.toLowerCase().includes(roomName.toLowerCase())) {
@@ -103,30 +121,39 @@ function joinRoom(roomName) {
     })
 
     if (!filteredRoom.length) {
-        console.log('room not found');
         result.status = 'fail';
         result.action = 'auto-join-room';
         result.text = 'Auto-join room failed. Room not found';
+        result.error_action = 'deleteAutoJoinRoomTimeoutEvent';
     } else if (filteredRoom.length == 1) {
-        console.log(filteredRoom[0]);
-        filteredRoom[0].style.display = 'inherit';
-        filteredRoom[0].click();
+        if (!isTestFirst) {
+            filteredRoom[0].style.display = 'inherit';
+            filteredRoom[0].click();
 
-        setTimeout(() => {
-            body = document.body;
-            let disableMicBtn = body.querySelector('#disableMic');
-            if (disableMicBtn) {
-                disableMicBtn.click();
-            }
-        }, 1000);
+            setTimeout(() => {
+                body = document.body;
+                let disableMicBtn = body.querySelector('#disableMic');
+                if (disableMicBtn) {
+                    disableMicBtn.click();
+                }
+            }, 1000);
+        }
+
     } else {
-        console.log('more than 1 room');
         result.status = 'fail';
         result.action = 'auto-join-room';
         result.text = 'Auto-join room failed. More than 1 room found';
+        result.error_action = 'deleteAutoJoinRoomTimeoutEvent';
     }
 
     return result;
+}
+
+let joinRoomWithDelay = (roomName, delay) => {
+    autoJoinTimeOutEvent = setTimeout(() => {
+        let result = c_joinRoom(roomName);
+        return result;
+    }, delay * 1000);
 }
 
 function changeBG(url) {

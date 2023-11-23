@@ -4,7 +4,7 @@ body {
 }
 
 div {
-  padding: 2px;
+  padding: 3px;
 }
 
 div.first-line {
@@ -12,9 +12,38 @@ div.first-line {
   align-items: center;
 }
 div.first-line > * {
-  margin: 10px;
+  margin: 5px;
 }
 
+.inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.auto-join-room .delay-ipt {
+  max-width: 50px;
+}
+
+/* Counter */
+
+.counter > * {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.counter .countdown {
+  font-size: 30px;
+  font-weight: bold;
+  border: black 1px solid;
+  border-radius: 50%;
+  width: 50px;
+}
+
+.counter .pause {
+  background-color: yellowgreen;
+}
+
+/* Error */
 .error {
   color: red;
   top: 0;
