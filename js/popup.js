@@ -15,6 +15,7 @@ const options = { ...defaultOptions };
 
 let loading = document.getElementById('loading');
 let errorElm = document.getElementById('error');
+let timeOutEvent;
 
 let spaceSizeP = document.getElementById('space-size');
 let resetBtn = document.getElementById('reset');
@@ -246,6 +247,19 @@ function getStatus(name, value) {
     return options[name] ? options[name] : value;
 }
 
+function showError(text, timeOutInSeconds) {
+    timeOutInSeconds = timeOutInSeconds ? timeOutInSeconds : 5;
+    errorElm.innerText = text;
+
+    if (timeOutEvent) {
+        clearTimeout(timeOutEvent);
+    }
+
+    timeOutEvent = setTimeout(() => {
+        errorElm.innerText = '';
+    }, timeOutInSeconds * 1000);
+}
+
 function hideRooms() {
     let text = 'hideAll';
     if (options['except-room']) {
@@ -262,11 +276,16 @@ function hideRooms() {
     })
 }
 
-function joinRoom(text) {
+function joinRoom(roomName) {
+    initRoom();
+
+    if (!roomName) {
+        return;
+    }
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'auto-join-room', text: text }, (response) => {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'auto-join-room', text: roomName }, (response) => {
             if (response.status == 'fail') {
-                errorElm.innerText = response.text;
+                showError(response.text, 5);
             } else {
                 console.log('message sent', response);
             }

@@ -17,6 +17,10 @@ div.first-line > * {
 
 .error {
   color: red;
+  top: 0;
+  overflow: hidden;
+  position: fixed;
+  align-items: center;
 }
 
 .btn {
@@ -171,6 +175,11 @@ div.first-line > * {
 .collapsible {
   display: none;
 }
+
+.collapsible-head {
+  cursor: pointer;
+}
+
 /* Loader */
 .loader {
   background: #fff;

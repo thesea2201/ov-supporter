@@ -97,19 +97,28 @@ function joinRoom(roomName) {
 
     rooms.forEach(r => {
         if (r.parentElement.textContent.toLowerCase().includes(roomName.toLowerCase())) {
-            filteredRoom.push(r);
+            r.parentElement.style.display = 'inherit';
+            filteredRoom.push(r.parentElement);
         }
     })
 
-    if (filteredRoom.length = 0) {
+    if (!filteredRoom.length) {
         console.log('room not found');
         result.status = 'fail';
         result.action = 'auto-join-room';
         result.text = 'Auto-join room failed. Room not found';
-    } else if (filteredRoom.length = 1) {
-        console.log(filteredRoom);
-        filteredRoom[0].parentElement.style.display = 'inherit';
-        filteredRoom[0].parentElement.click();
+    } else if (filteredRoom.length == 1) {
+        console.log(filteredRoom[0]);
+        filteredRoom[0].style.display = 'inherit';
+        filteredRoom[0].click();
+
+        setTimeout(() => {
+            body = document.body;
+            let disableMicBtn = body.querySelector('#disableMic');
+            if (disableMicBtn) {
+                disableMicBtn.click();
+            }
+        }, 1000);
     } else {
         console.log('more than 1 room');
         result.status = 'fail';
@@ -130,6 +139,7 @@ function extractContent() {
     const iframe = document.body.querySelector('iframe.ql-video');
     if (iframe) {
         const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+        console.log(iframeDocument);
         const firstSpan = iframeDocument.querySelector('span');
 
         if (firstSpan) {
