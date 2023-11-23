@@ -120,7 +120,8 @@ autoJoinRoomIpt.addEventListener('click', (e) => {
         setStatus('auto-join-room-name', autoJoinRoomNameIpt.value);
         if (
             options["auto-join-room"] &&
-            (e.key == 'Enter' || event == 'focusout')
+            (e.key == 'Enter' || event == 'focusout') &&
+            options["auto-join-room-name"]
         ) {
             joinRoom(options["auto-join-room-name"]);
         }
@@ -353,6 +354,7 @@ let joinRoomWithDelay = (roomName, delay) => {
 }
 
 let initJoinCounter = (delay) => {
+    countdownElm.classList.remove('hide');
     countdownElm.innerText = delay;
     startCounter(delay);
 };
@@ -391,7 +393,6 @@ let pauseJoinRoom = () => {
 let restartJoinRoom = () => {
     // restartCounterBtn.classList.add('hide');
     // pauseCounterBtn.classList.remove('hide');
-    countdownElm.classList.remove('hide');
     initAutoJoinRoom();
 }
 
