@@ -11,7 +11,8 @@ div.first-line {
   display: inline-flex;
   align-items: center;
 }
-div.first-line > * {
+
+div.first-line>* {
   margin: 5px;
 }
 
@@ -26,11 +27,12 @@ div.first-line > * {
 
 /* Counter */
 
-.counter > * {
+.counter>* {
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .counter .countdown {
   font-size: 30px;
   font-weight: bold;
@@ -86,6 +88,15 @@ div.first-line > * {
   background-color: green;
 }
 
+.primary-btn {
+  background-color: blue;
+}
+
+.dark-btn {
+  background-color: black;
+}
+
+
 /* Checkbox */
 
 .checkbox-wrapper-1 *,
@@ -93,6 +104,7 @@ div.first-line > * {
 .checkbox-wrapper-1 ::before {
   box-sizing: border-box;
 }
+
 .checkbox-wrapper-1 [type="checkbox"].substituted {
   margin: 0;
   width: 0;
@@ -102,7 +114,8 @@ div.first-line > * {
   -moz-appearance: none;
   appearance: none;
 }
-.checkbox-wrapper-1 [type="checkbox"].substituted + label:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted+label:before {
   font-size: 14px;
   content: "";
   display: inline-block;
@@ -115,48 +128,48 @@ div.first-line > * {
   box-shadow: 0 0 0.04em, 0 0.06em 0.16em -0.03em inset,
     0 0 0 0.07em transparent inset;
   border-radius: 0.2em;
-  background: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve" fill="white" viewBox="0 0 9 9"><rect x="0" y="4.3" transform="matrix(-0.707 -0.7072 0.7072 -0.707 0.5891 10.4702)" width="4.3" height="1.6" /><rect x="2.2" y="2.9" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 12.1877 2.9833)" width="6.1" height="1.7" /></svg>')
-      no-repeat center,
+  background: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xml:space="preserve" fill="white" viewBox="0 0 9 9"><rect x="0" y="4.3" transform="matrix(-0.707 -0.7072 0.7072 -0.707 0.5891 10.4702)" width="4.3" height="1.6" /><rect x="2.2" y="2.9" transform="matrix(-0.7071 0.7071 -0.7071 -0.7071 12.1877 2.9833)" width="6.1" height="1.7" /></svg>') no-repeat center,
     white;
   background-size: 0;
   will-change: color, border, background, background-size, box-shadow;
   transform: translate3d(0, 0, 0);
   transition: color 0.1s, border 0.1s, background 0.15s, box-shadow 0.1s;
+  cursor: pointer;
 }
-.checkbox-wrapper-1 [type="checkbox"].substituted:enabled:active + label:before,
-.checkbox-wrapper-1
-  [type="checkbox"].substituted:enabled
-  + label:active:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted:enabled:active+label:before,
+.checkbox-wrapper-1 [type="checkbox"].substituted:enabled+label:active:before {
   box-shadow: 0 0 0.04em, 0 0.06em 0.16em -0.03em transparent inset,
     0 0 0 0.07em rgba(0, 0, 0, 0.1) inset;
   background-color: #f0f0f0;
 }
-.checkbox-wrapper-1 [type="checkbox"].substituted:checked + label:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted:checked+label:before {
   background-color: #3b99fc;
   background-size: 0.75em;
   color: rgba(0, 0, 0, 0.075);
 }
-.checkbox-wrapper-1
-  [type="checkbox"].substituted:checked:enabled:active
-  + label:before,
-.checkbox-wrapper-1
-  [type="checkbox"].substituted:checked:enabled
-  + label:active:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted:checked:enabled:active+label:before,
+.checkbox-wrapper-1 [type="checkbox"].substituted:checked:enabled+label:active:before {
   background-color: #0a7ffb;
   color: rgba(0, 0, 0, 0.275);
 }
-.checkbox-wrapper-1 [type="checkbox"].substituted:focus + label:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted:focus+label:before {
   box-shadow: 0 0 0.04em, 0 0.06em 0.16em -0.03em transparent inset,
     0 0 0 0.07em rgba(0, 0, 0, 0.1) inset, 0 0 0 3.3px rgba(65, 159, 255, 0.55),
     0 0 0 5px rgba(65, 159, 255, 0.3);
 }
-.checkbox-wrapper-1 [type="checkbox"].substituted:focus:active + label:before,
-.checkbox-wrapper-1 [type="checkbox"].substituted:focus + label:active:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted:focus:active+label:before,
+.checkbox-wrapper-1 [type="checkbox"].substituted:focus+label:active:before {
   box-shadow: 0 0 0.04em, 0 0.06em 0.16em -0.03em transparent inset,
     0 0 0 0.07em rgba(0, 0, 0, 0.1) inset, 0 0 0 3.3px rgba(65, 159, 255, 0.55),
     0 0 0 5px rgba(65, 159, 255, 0.3);
 }
-.checkbox-wrapper-1 [type="checkbox"].substituted:disabled + label:before {
+
+.checkbox-wrapper-1 [type="checkbox"].substituted:disabled+label:before {
   opacity: 0.5;
 }
 
@@ -244,6 +257,7 @@ div.first-line > * {
   transform-origin: 50% 100%;
   width: 100px;
 }
+
 .loader-line {
   border: 4px solid transparent;
   border-radius: 100%;
@@ -256,18 +270,23 @@ div.first-line > * {
   top: 0;
   width: 100px;
 }
+
 .loader-line-wrap:nth-child(1) {
   animation-delay: -50ms;
 }
+
 .loader-line-wrap:nth-child(2) {
   animation-delay: -100ms;
 }
+
 .loader-line-wrap:nth-child(3) {
   animation-delay: -150ms;
 }
+
 .loader-line-wrap:nth-child(4) {
   animation-delay: -200ms;
 }
+
 .loader-line-wrap:nth-child(5) {
   animation-delay: -250ms;
 }
@@ -278,24 +297,28 @@ div.first-line > * {
   width: 90px;
   top: 7px;
 }
+
 .loader-line-wrap:nth-child(2) .loader-line {
   border-color: hsl(60, 80%, 60%);
   height: 76px;
   width: 76px;
   top: 14px;
 }
+
 .loader-line-wrap:nth-child(3) .loader-line {
   border-color: hsl(120, 80%, 60%);
   height: 62px;
   width: 62px;
   top: 21px;
 }
+
 .loader-line-wrap:nth-child(4) .loader-line {
   border-color: hsl(180, 80%, 60%);
   height: 48px;
   width: 48px;
   top: 28px;
 }
+
 .loader-line-wrap:nth-child(5) .loader-line {
   border-color: hsl(240, 80%, 60%);
   height: 34px;
@@ -304,10 +327,12 @@ div.first-line > * {
 }
 
 @keyframes spin {
+
   0%,
   15% {
     transform: rotate(0);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -339,6 +364,7 @@ div.first-line > * {
   box-shadow: none;
   outline: none;
 }
+
 .custom-file-input:focus {
   box-shadow: rgba(68, 74, 70, 0.4) 0 0 0 3px;
   outline: none;
@@ -353,4 +379,17 @@ div.first-line > * {
 
 .custom-file-input:active {
   box-shadow: rgba(20, 70, 32, 0.2) 0 1px 0 inset;
+}
+
+.substituted {
+  margin: 0 10px;
+}
+
+.disabled-div {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+.hor-seperator {
+  margin: 0 5px;
 }

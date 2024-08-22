@@ -1,109 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OV supporter Extension</title>
-    <link rel="stylesheet" href="css/popup.css" />
-  </head>
 
-  <body>
-    <div id="loading" style="display: none" class="loader">
-      <div class="loader-inner">
-        <div class="loader-line-wrap">
-          <div class="loader-line"></div>
-        </div>
-        <div class="loader-line-wrap">
-          <div class="loader-line"></div>
-        </div>
-        <div class="loader-line-wrap">
-          <div class="loader-line"></div>
-        </div>
-        <div class="loader-line-wrap">
-          <div class="loader-line"></div>
-        </div>
-        <div class="loader-line-wrap">
-          <div class="loader-line"></div>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OV supporter Extension</title>
+  <link rel="stylesheet" href="css/popup.css" />
+</head>
+
+<body>
+  <div id="loading" style="display: none" class="loader">
+    <div class="loader-inner">
+      <div class="loader-line-wrap">
+        <div class="loader-line"></div>
+      </div>
+      <div class="loader-line-wrap">
+        <div class="loader-line"></div>
+      </div>
+      <div class="loader-line-wrap">
+        <div class="loader-line"></div>
+      </div>
+      <div class="loader-line-wrap">
+        <div class="loader-line"></div>
+      </div>
+      <div class="loader-line-wrap">
+        <div class="loader-line"></div>
       </div>
     </div>
+  </div>
 
-    <!-- Create div for error message -->
-    <div id="error" class="error"></div>
+  <!-- Create div for error message -->
+  <div id="error" class="error"></div>
 
-    <div id="popup" class="background">
-      <div class="first-line">
-        <p id="space-size"></p>
-        <button id="reset" class="btn danger-btn" title="Reset to default">
-          Reset
-        </button>
-        <!-- <button id="set-default" class="btn success-btn" title="Set current configuration is default">Set default</button> -->
-      </div>
-      <!-- <div class="diligence">
+  <div id="popup" class="background">
+    <div class="first-line">
+      <p id="space-size">Space size: 1200x640px</p>
+      <button id="import-setting" class="btn primary-btn" title="Import the backup settings">
+        Import
+      </button>
+      <button id="export-setting" class="btn dark-btn" title="Import the backup settings">
+        Export
+      </button>
+      <button id="reset-setting" class="btn danger-btn" title="Reset all settings to default">
+        Reset
+      </button>
+      <!-- <button id="set-default" class="btn success-btn" title="Set current configuration is default">Set default</button> -->
+    </div>
+    <!-- <div class="diligence">
         <p>Notification:</p>
         <ul id="diligence"></ul>
       </div> -->
+    <hr />
+    <div class="options">
+      <div class="checkbox-wrapper-1">
+        <input id="hide-notification" class="substituted" type="checkbox" aria-hidden="false" />
+        <label for="hide-notification">Hide notification</label>
+      </div>
+
       <hr />
-      <div class="options">
-        <div class="checkbox-wrapper-1">
-          <input
-            id="hide-notification"
-            class="substituted"
-            type="checkbox"
-            aria-hidden="true"
-          />
-          <label for="hide-notification">Hide notification</label>
+      <div class="checkbox-wrapper-1">
+        <div class="inline">
+          <input id="smart-hide-rooms" class="substituted" type="checkbox" aria-hidden="false" />
+          <label for="smart-hide-rooms" title="Auto hide rooms that are do not have any people.">Smart hide
+            rooms</label>
+          <span class="hor-seperator">|</span>
+          <input id="hide-rooms" class="substituted" type="checkbox" aria-hidden="false" />
+          <label for="hide-rooms" title="To hide all rooms">Hide rooms</label>
         </div>
-
-        <hr />
-        <div class="checkbox-wrapper-1">
-          <input
-            id="hide-rooms"
-            class="substituted"
-            type="checkbox"
-            aria-hidden="true"
-          />
-          <label for="hide-rooms">Hide rooms</label>
-          <div>
-            <label for="except-room">Except room(separated by comma):</label>
-            <input id="except-room" placeholder="admin,c01" type="text" />
-          </div>
-        </div>
-
-        <hr />
-        <!-- Start auto join room section -->
-        <div class="checkbox-wrapper-1">
-          <div class="inline auto-join-room">
-            <div>
-              <input
-                id="auto-join-room"
-                class="substituted"
-                type="checkbox"
-                aria-hidden="true"
-              />
-              <label for="auto-join-room">Auto-join room. After </label>
-              <!-- after seconds -->
-              <input id="delay-auto-join" class="delay-ipt" type="number" />
-              <label for="delay-auto-join">second(s)</label>
-            </div>
-          </div>
-          <div class="inline">
-            <div>
-              <label for="auto-join-room-name">Room name(only 1 room):</label>
-              <input id="auto-join-room-name" placeholder="admin" type="text" />
-            </div>
-
-            <div class="counter">
-              <label id="countdown" for="count-down" class="countdown hide"></label>
-              <!-- <button id="pause-counter" class="btn pause hide">Pause</button>
-              <button id="restart-counter" class="btn pause hide">Restart</button> -->
-            </div>
-          </div>
-        </div>
-        <!-- End auto join room section -->
-
-        <hr />
         <div>
+          <label for="except-room"
+            title="Force show the following room(s). This setting will ignore the smart hide or hide rooms settings.">Except
+            following room(s):</label>
+          <input id="except-room" placeholder="Ex: room1,room2" type="text" />
+          <button id="clear-rooms" class="btn danger-btn">Clear</button>
+        </div>
+      </div>
+
+      <hr />
+      <!-- Start auto join room section -->
+      <div class="checkbox-wrapper-1">
+        <div class="inline auto-join-room">
+          <div>
+            <input id="auto-join-room" class="substituted" type="checkbox" aria-hidden="false" />
+            <label for="auto-join-room">Auto-join room. Delay </label>
+            <!-- after seconds -->
+            <input id="delay-auto-join" class="delay-ipt" type="number" />
+            <label for="delay-auto-join">second(s)</label>
+          </div>
+        </div>
+        <div class="inline">
+          <div>
+            <label for="auto-join-room-name">Room name(only 1 room):</label>
+            <input id="auto-join-room-name" placeholder="Ex: room1" type="text" />
+          </div>
+
+          <div class="counter">
+            <label id="countdown" for="count-down" class="countdown hide"></label>
+            <!-- <button id="pause-counter" class="btn pause hide">Pause</button>
+              <button id="restart-counter" class="btn pause hide">Restart</button> -->
+          </div>
+        </div>
+      </div>
+      <!-- End auto join room section -->
+
+      <hr />
+      <div>
+        <div>
+          <label for="set-unsplash-key">Enter your Unsplash API key:</label>
+          <button id="set-unsplash-key" class="btn primary-btn">Set</button>
+        </div>
+
+        <div id="unsplash-feature">
           <div>
             <label for="tags">Tags (separated by comma):</label>
             <input type="text" id="tags" placeholder="beach,motivation" />
@@ -113,39 +120,37 @@
               Change background
             </button>
           </div>
+        </div>
+
+        <span>------------------</span>
+
+        <div>
+          <span id="more-options" class="collapsible-head">Or click for more options ↵</span>
+        </div>
+        <div id="bg-options" class="collapsible">
           <div>
-            <span id="more-options" class="collapsible-head">Or click for more options ↵</span>
+            <input type="file" id="upload-bg" accept="image/*" class="custom-file-input" />
           </div>
-          <div id="bg-options" class="collapsible">
-            <div>
-              <input
-                type="file"
-                id="upload-bg"
-                accept="image/*"
-                class="custom-file-input"
-              />
-            </div>
-            <span>Or</span>
-            <div>
-              <label for="bg-link">Paste your image link here:</label>
-              <input type="text" id="bg-link" placeholder="https://..." />
-            </div>
+          <span>Or</span>
+          <div>
+            <label for="bg-link">Enter your image link here:</label>
+            <input type="text" id="bg-link" placeholder="Ex: https://images.unsplash.com/photo-17239835485..." />
           </div>
         </div>
-
-        <div class="checkbox-wrapper-1">
-          <input
-            id="keep-bg"
-            class="substituted"
-            type="checkbox"
-            aria-hidden="true"
-          />
-          <label for="keep-bg">Keep the last background</label>
-        </div>
-
-        <hr />
       </div>
+
+      <div class="checkbox-wrapper-1">
+        <input id="keep-bg" class="substituted" type="checkbox" aria-hidden="false" />
+        <label for="keep-bg">Keep the last background</label>
+      </div>
+
+      <hr />
     </div>
-    <script src="js/popup.js"></script>
-  </body>
+  </div>
+
+  <script src="js/popup.js"></script>
+  <script src="js/libs/crypto-js.min.js"></script>
+  <script src="js/libs/aes.min.js"></script>
+</body>
+
 </html>

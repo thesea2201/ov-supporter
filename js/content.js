@@ -1,9 +1,7 @@
-console.log('ov-supporter, content started');
-
 let autoJoinTimeOutEvent;
+let smartHideRoomEvent;
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    console.log('ov-supporter', request);
     let result = {
         status: 'success',
         action: request.action,
@@ -19,6 +17,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     if (request.action === 'rooms') {
+        clearInterval(smartHideRoomEvent);
         hideRoomElements(request.text);
         sendResponse(result);
     }
@@ -29,10 +28,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
 
     if (request.action === 'openspace') {
-        if (request.text == 'windowSize') {
-            let result = getWindowSize();
-            sendResponse(result);
-        }
+        let result = initSetting();
+        sendResponse(result);
     }
 
     if (request.action === 'test-auto-join-room') {
@@ -57,12 +54,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 })
 
-function getWindowSize() {
+function initSetting() {
     let openSpace = document.getElementById('openspace');
 
     return {
-        width: openSpace.parentElement.offsetWidth,
-        height: openSpace.parentElement.offsetHeight,
+        width: openSpace.querySelector('div:nth-child(2)').offsetWidth,
+        height: openSpace.querySelector('div:nth-child(2)').offsetHeight,
         origin_bg: document.getElementById('openspace_scrollable').querySelector('img').src
     };
 }
@@ -74,7 +71,7 @@ function hideNotification(isHide) {
     if (notifyIframe) {
         notifyIframe.parentElement.parentElement.parentElement.parentElement.style.width = isHide ? '0px' : '1200px';
     } else {
-        alert('iframe not found');
+        console.log('iframe not found');
     }
 }
 
@@ -82,24 +79,62 @@ function hideRoomElements(status) {
     let body = document.body;
     let rooms = body.querySelectorAll('.MuiGrid-container');
 
-    let isHide = (status == 'hideAll' || status.includes('hide-except:')) ? true : false;
+    let isHide = (
+        status == 'hideAll' ||
+        status == 'hide-smart' ||
+        status.includes('hide-except:')
+    ) ? true : false;
+
 
     rooms.forEach(room => {
         room.parentElement.style.display = isHide ? 'none' : 'inherit';
     })
 
-    if (status.includes('hide-except:')) {
-        status = status.replace('hide-except:', '');
+    if (status.includes('hide-smart:')) {
+        let roomStr = status.replace('hide-except:', '');
+        showRoomHasPeople(rooms);
+        showExceptRoom(rooms, roomStr);
 
-        rooms.forEach(r => {
-            status.split(',').forEach(roomName => {
-                if (r.parentElement.textContent.toLowerCase().includes(roomName.toLowerCase())) {
-                    r.parentElement.style.display = 'inherit';
-                }
-            })
-        })
+        smartHideRoomEvent = setInterval(() => {
+            showRoomHasPeople(rooms);
+            showExceptRoom(rooms, roomStr);
+        }, 5000)
     }
 
+
+    if (status.includes('hide-except:')) {
+        let roomStr = status.replace('hide-except:', '');
+
+        showExceptRoom(rooms, roomStr);
+    }
+
+}
+
+const showRoomHasPeople = (rooms) => {
+    rooms.forEach(room => {
+        let slotElm = room.parentElement.firstElementChild;
+        const roomIsHide = room.parentElement.style.display === 'none';
+
+        if (slotElm.querySelector('img') !== null && roomIsHide) {
+            room.parentElement.style.display = 'inherit';
+        } else if (slotElm.querySelector('img') == null && !roomIsHide) {
+            room.parentElement.style.display = 'none';
+        }
+    })
+}
+
+const showExceptRoom = (rooms, roomStr) => {
+    if (roomStr.trim() == '') {
+        return;
+    }
+
+    rooms.forEach(r => {
+        roomStr.split(',').forEach(roomName => {
+            if (r.parentElement.textContent.toLowerCase().includes(roomName.toLowerCase())) {
+                r.parentElement.style.display = 'inherit';
+            }
+        })
+    })
 }
 
 let c_joinRoom = (roomName, isTestFirst) => {
@@ -157,7 +192,10 @@ let joinRoomWithDelay = (roomName, delay) => {
 }
 
 function changeBG(url) {
-    document.getElementById('openspace_scrollable').querySelector('img').src = url;
+    let imgElm = document.getElementById('openspace_scrollable').querySelector('img');
+    imgElm.src = url;
+    imgElm.style.objectFit = 'fill';
+    imgElm.style.height = 'auto';
 }
 
 
@@ -166,7 +204,6 @@ function extractContent() {
     const iframe = document.body.querySelector('iframe.ql-video');
     if (iframe) {
         const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
-        console.log(iframeDocument);
         const firstSpan = iframeDocument.querySelector('span');
 
         if (firstSpan) {

@@ -1,12 +1,15 @@
+const DEFAULT_TAG = 'vietnam';
 const defaultOptions = {
+    "credential": '',
     "hide-notification": false,
+    "smart-hide-rooms": false,
     "hide-rooms": false,
     "except-room": "",
     "auto-join-room": false,
     "auto-join-room-name": "",
     "delay-auto-join": 5,
     "keep-background": true,
-    "tags": "",
+    "tags": DEFAULT_TAG,
     "origin-bg": "",
     "background": "",
     "width": 1200,
@@ -19,11 +22,15 @@ let errorElm = document.getElementById('error');
 let errorTimeoutEvent;
 
 let spaceSizeP = document.getElementById('space-size');
-let resetBtn = document.getElementById('reset');
+let importBtn = document.getElementById('import-setting');
+let exportBtn = document.getElementById('export-setting');
+let resetBtn = document.getElementById('reset-setting');
 let notificationIpt = document.getElementById('hide-notification');
 
 let roomsIpt = document.getElementById('hide-rooms');
+let smartHideRoomsIpt = document.getElementById('smart-hide-rooms');
 let exceptRoomIpt = document.getElementById('except-room');
+let clearRoomsBtn = document.getElementById('clear-rooms');
 
 let autoJoinRoomIpt = document.getElementById('auto-join-room');
 let autoJoinRoomNameIpt = document.getElementById('auto-join-room-name');
@@ -33,6 +40,8 @@ let countdownElm = document.getElementById('countdown');
 // let restartCounterBtn = document.getElementById('restart-counter');
 let countdownTimeOutEvent;
 
+let unsplashAPIKeyIpt = document.getElementById('set-unsplash-key');
+let unsplashFeatureElm = document.getElementById('unsplash-feature');
 let tagIpt = document.getElementById('tags');
 let changeImgBtn = document.getElementById('change-bg');
 
@@ -44,8 +53,8 @@ let bgLinkIpt = document.getElementById('bg-link');
 let keepBGIpt = document.getElementById('keep-bg');
 
 
-// Asynchronously retrieve data from storage.sync, then cache it.
-const initStorageCache = chrome.storage.local.get().then((items) => {
+// Asynchronously retrieve data from storage.local, then cache it.
+const initStorageCacheLocal = chrome.storage.local.get().then((items) => {
     // Copy the data retrieved from storage into storageCache.
     init(items);
 
@@ -54,9 +63,9 @@ const initStorageCache = chrome.storage.local.get().then((items) => {
 // Action
 chrome.action.onClicked.addListener(async (tab) => {
     try {
-        await initStorageCache;
+        await initStorageCacheLocal;
     } catch (e) {
-        console.log(e);
+        console.error(e);
     }
 });
 
@@ -67,7 +76,6 @@ notificationIpt.addEventListener('change', (e) => {
 
 
     setStatus('hide-notification', isChecked);
-    console.log('hide-notification:' + isChecked);
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'notification', text: isChecked ? 'hide' : 'show' }, (response) => {
@@ -76,8 +84,42 @@ notificationIpt.addEventListener('change', (e) => {
     })
 });
 
+
+importBtn.addEventListener('click', async (e) => {
+    let uploadIpt = document.createElement('input');
+    uploadIpt.type = 'file';
+    uploadIpt.accept = '.txt';
+    uploadIpt.click();
+    uploadIpt.onchange = async (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target.result;
+            const key = prompt('Please enter your secret key:');
+            const result = importSetting(text, key);
+            if (result) {
+                const setting = JSON.parse(result);
+                init(setting);
+            } else {
+                alert('Wrong key or wrong setting file. please try again.');
+            }
+        };
+        reader.readAsText(file);
+    };
+});
+
+
+exportBtn.addEventListener('click', async (e) => {
+    const key = prompt('Please enter your secret key:');
+    const settingContent = exportSetting(JSON.stringify(options), key);
+    let downloadElm = document.createElement('a');
+
+    downloadElm.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(settingContent));
+    downloadElm.setAttribute('download', 'ov-supporter-setting.txt');
+    downloadElm.click();
+});
+
 resetBtn.addEventListener('click', async (e) => {
-    console.log('reset');
     resetOptionsToDefault();
     init(options);
 });
@@ -86,21 +128,38 @@ roomsIpt.addEventListener('change', (e) => {
     let isChecked = e.currentTarget.checked;
 
     setStatus('hide-rooms', isChecked);
+    if (isChecked) {
+        setStatus('smart-hide-rooms', !isChecked);
+        smartHideRoomsIpt.checked = !isChecked;
+    }
 
     hideRooms();
 });
 
-['keypress', 'focusout'].forEach((event) => {
-    exceptRoomIpt.addEventListener(event, (e) => {
-        setStatus('except-room', exceptRoomIpt.value);
-        if (e.key == 'Enter' || event == 'focusout') {
-            hideRooms();
-        }
-    })
-})
+smartHideRoomsIpt.addEventListener('change', (e) => {
+    let isChecked = e.currentTarget.checked;
+
+    setStatus('smart-hide-rooms', isChecked);
+
+    hideRooms();
+});
+
+// ['keypress', 'focusout'].forEach((event) => {
+//     exceptRoomIpt.addEventListener(event, (e) => {
+//         setStatus('except-room', exceptRoomIpt.value);
+//         if (e.key == 'Enter' || event == 'focusout') {
+//             hideRooms();
+//         }
+//     })
+// })
+
+clearRoomsBtn.addEventListener('click', (e) => {
+    exceptRoomIpt.value = '';
+    // setStatus('except-room', '');
+    // hideRooms();
+});
 
 autoJoinRoomIpt.addEventListener('click', (e) => {
-    console.log('auto-join-room:' + e.currentTarget.checked);
     let isChecked = e.currentTarget.checked;
 
     setStatus('auto-join-room', isChecked);
@@ -116,7 +175,6 @@ autoJoinRoomIpt.addEventListener('click', (e) => {
 
 ['keypress', 'focusout'].forEach((event) => {
     autoJoinRoomNameIpt.addEventListener(event, (e) => {
-        console.log('auto-join-room-name:' + event + autoJoinRoomNameIpt.value);
         setStatus('auto-join-room-name', autoJoinRoomNameIpt.value);
         if (
             options["auto-join-room"] &&
@@ -142,7 +200,22 @@ autoJoinRoomIpt.addEventListener('click', (e) => {
 //     restartJoinRoom();
 // });
 
-tagIpt.addEventListener('keypress', (e) => {
+unsplashAPIKeyIpt.addEventListener('click', async (e) => {
+    const key = prompt('Please enter your unsplash API key:').trim();
+    if (key) {
+        const credential = `client_id=${key}`;
+        const imageUrl = await getUnsplashImagesFromTags(credential, 'beach');
+        if (!imageUrl) {
+            alert('Unsplash API key is wrong. Please try again!');
+        } else {
+            setStatus('credential', credential);
+            enableOrDisableUnsplashFeature(checkCredential());
+        }
+    }
+
+});
+
+tagIpt.addEventListener('keyup', (e) => {
     setStatus('tags', tagIpt.value.replaceAll(' ', ''));
     if (e.key == 'Enter') {
         changeBG();
@@ -192,7 +265,6 @@ keepBGIpt.addEventListener('change', (e) => {
 // Functions
 
 let init = (items) => {
-    console.log(items);
     Object.assign(options, items);
 
     let isDelay = options['origin-bg'] ? false : true;
@@ -213,6 +285,7 @@ let init = (items) => {
 let initElm = () => {
     notificationIpt.checked = options['hide-notification'];
     roomsIpt.checked = options['hide-rooms'];
+    smartHideRoomsIpt.checked = options['smart-hide-rooms'];
 
     exceptRoomIpt.value = options['except-room'];
 
@@ -226,7 +299,7 @@ let initElm = () => {
         // restartCounterBtn.classList.add('hide');
     }
 
-    tagIpt.value = options['tags'];
+    tagIpt.value = options['tags'] ? options['tags'].replaceAll(' ', '') : DEFAULT_TAG;
     keepBGIpt.checked = options['keep-background'];
 }
 
@@ -273,12 +346,12 @@ let initBackground = (isDelay) => {
     }
 }
 
-let setStatus = (name, value) => {
+let setStatus = (name, value, storageType = 'local') => {
     if (name) {
         options[name] = value;
     }
-    console.log(options);
-    chrome.storage.local.set(options);
+
+    chrome.storage[storageType].set(options);
 }
 
 let getStatus = (name, value) => {
@@ -300,10 +373,12 @@ let showError = (text, timeOutInSeconds) => {
 
 let hideRooms = () => {
     let text = 'hideAll';
-    if (options['except-room']) {
+    if (options['smart-hide-rooms'] == true) {
+        text = `hide-smart:${options['except-room']}`;
+    } else if (options['except-room']) {
         text = `hide-except:${options['except-room']}`;
     }
-    if (options['hide-rooms'] == false) {
+    if (options['hide-rooms'] == false && options['smart-hide-rooms'] == false) {
         text = 'show';
     }
 
@@ -396,31 +471,85 @@ let restartJoinRoom = () => {
     initAutoJoinRoom();
 }
 
-let changeBG = (background) => {
+let changeBG = async (background) => {
     if (background) {
         sendMessageChangeBG(background);
     } else {
-        showLoading();
-
         let tags = options['tags'];
+        const credential = getStatus('credential', '');
+
         setStatus('tags', tags);
-        let width = options['width'];
-        let height = options['height'];
+        const imageUrl = await getUnsplashImagesFromTags(credential, tags);
 
-        let preUrl = `https://source.unsplash.com/random/${width}x${height}/?${tags}`;
-        let request = new XMLHttpRequest();
-        request.open('GET', preUrl, true);
-        request.onload = function () {
-            let url = request.responseURL;
-            setStatus('background', url);
-            sendMessageChangeBG(url);
-
-            hideLoading();
+        if (imageUrl) {
+            setStatus('background', imageUrl);
+            sendMessageChangeBG(imageUrl);
+        } else {
+            alert('Can not get image from unsplash. Unsplash API key is wrong or can not find any image with these tags. Please try again!');
         }
-        request.send(null);
     }
-
 }
+
+const checkCredential = () => {
+    const credential = getStatus('credential', '');
+    if (credential) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+const enableOrDisableUnsplashFeature = (isEnable) => {
+    if (isEnable) {
+        unsplashFeatureElm.classList.remove('disabled-div');
+    } else {
+        unsplashFeatureElm.classList.add('disabled-div');
+    }
+}
+
+
+const getUnsplashImagesFromTags = async (credential, tags) => {
+    let imageUrl = null;
+    try {
+        showLoading();
+        const preUrl = `https://api.unsplash.com/photos/random?${credential}&orientation=landscape&query=${tags}`;
+        const result = await makeRequest("GET", preUrl);
+
+        const data = JSON.parse(result);
+        imageUrl = data['urls']['regular'];
+    } catch (error) {
+        console.error(error);
+    } finally {
+        hideLoading();
+
+        return imageUrl;
+    }
+}
+
+function makeRequest(method, url) {
+    return new Promise(function (resolve, reject) {
+        let xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.onload = function () {
+            if (this.status >= 200 && this.status < 300) {
+                resolve(xhr.response);
+            } else {
+                reject({
+                    status: this.status,
+                    statusText: xhr.statusText
+                });
+            }
+        };
+        xhr.onerror = function () {
+            reject({
+                status: this.status,
+                statusText: xhr.statusText
+            });
+        };
+        xhr.send();
+    });
+}
+
 
 let sendMessageChangeBG = (url) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -441,18 +570,45 @@ let showLoading = () => {
 let getWindowSize = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'openspace', text: 'windowSize' }, (response) => {
-            console.log(response);
             if (response) {
                 setStatus('width', response.width);
                 setStatus('height', response.height);
-                if (!options['origin-bg']) {
-                    setStatus('origin-bg', response.origin_bg);
-                }
+                setStatus('origin-bg', getStatus('origin-bg') || response.origin_bg);
             }
 
             spaceSizeP.innerText = `Space size: ${options.width}x${options.height}px`
         })
     })
+}
+
+const _encrypt = (text, key) => {
+    let result = '';
+    try {
+        result = CryptoJS.AES.encrypt(text, key).toString();
+    } catch (error) {
+        console.error(error);
+    }
+
+    return result;
+}
+
+const _decrypt = (text, key) => {
+    let result = '';
+    try {
+        result = CryptoJS.AES.decrypt(text, key).toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error(error);
+    }
+
+    return result;
+}
+
+const exportSetting = (text, key) => {
+    return _encrypt(text, key);
+}
+
+const importSetting = (text, key) => {
+    return _decrypt(text, key);
 }
 
 let resetOptionsToDefault = () => {
@@ -468,9 +624,7 @@ let sendMessageChrome = async (data) => {
         chrome.tabs.sendMessage(tabs[0].id, data, (response) => {
             if (response && response.status === 'fail') {
                 showError(response.text);
-                console.log(response.error_action);
                 if (response.error_action === 'deleteAutoJoinRoomTimeoutEvent') {
-                    console.log('deleteAutoJoinRoomTimeoutEvent');
                     countdownElm.classList.add('hide');
                     clearTimeout(countdownTimeOutEvent);
                 }

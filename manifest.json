@@ -2,28 +2,35 @@
     "manifest_version": 3,
     "name": "OV supporter",
     "description": "OV supporter",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "permissions": [
-        "cookies",
-        "activeTab",
-        "storage",
-        "webNavigation"
+        "storage"
     ],
+    "icons": {
+        "16": "images/icon16.png",
+        "24": "images/icon24.png",
+        "32": "images/icon32.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
     "action": {
         "default_icon": {
-            "16": "images/logo16.png",
-            "24": "images/logo24.png",
-            "32": "images/logo32.png"
+            "16": "images/icon16.png",
+            "24": "images/icon24.png",
+            "32": "images/icon32.png",
+            "48": "images/icon48.png",
+            "128": "images/icon128.png"
         },
-        "default_popup": "popup.html"
+        "default_popup": "popup.html",
+        "default_title": "OV supporter"
     },
     "host_permissions": [
-        "<all_urls>"
+        "*://*.ovice.in/*"
     ],
     "content_scripts": [
         {
             "matches": [
-                "<all_urls>"
+                "*://*.ovice.in/*"
             ],
             "js": [
                 "js/content.js"
