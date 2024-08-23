@@ -4,15 +4,30 @@ OV Supporter is a small Chrome extension that helps users manage their oVice vir
 
 ## Features
 
--   Hide distract things: You can hide the notification bar, all room, and also has an option to hide except your favorite room
+-   Import/Export/Reset settings.
+-   Hide distract things: 
+    -   Hide the notification bar
+    -   Smart hide rooms - only hide rooms that do not have any member
+    -   Hide all room 
+    -   Also has an option to hide except your favorite room
 -   Auto-join any room: You always in the meeting room to keep your work smooth. Don't worry, just turn on the auto-join room in the setting.
 -   Change background: Current background is fine but you want more?
-    -   You can change the background with your favorite topic by only 1 click.
+    -   You can change the background with your favorite topic by only 1 click (need Unsplash API key).
     -   More than that, you can also upload image or paste image url.
     -   Keep your last interested image or randomly image for next time visit, it never easy than now by 1 click.
 -   User-friendly interface: Intuitive and easy-to-use interface for a seamless user experience.
 
-## Installation
+### Incoming features:
+
+-   Bring back "Enter to start" when comeback Ovice.
+-   Auto switch to custom mode when beginning.
+-   Get image from your Unsplash collection (need Unsplash API key).
+-   Welcome your ideas ....
+
+## Chrome extension link
+https://chromewebstore.google.com/detail/ov-supporter/ggdebbjngbgmkpcakblehniphfcgmjoo?authuser=1&hl=en
+
+## Load unpacked or development
 
 Download latest version of <a href="https://github.com/thesea2201/ov-supporter/releases">ov-supporter/releases</a> in the `Assets` section.
 
