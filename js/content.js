@@ -7,6 +7,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         action: request.action,
         text: request.text
     };
+    console.log('ov-supporter request', request);
     if (request.action === 'notification') {
         if (request.text == 'hide') {
             hideNotification(true);
@@ -91,7 +92,8 @@ function hideRoomElements(status) {
     })
 
     if (status.includes('hide-smart:')) {
-        let roomStr = status.replace('hide-except:', '');
+        let roomStr = status.replace('hide-smart:', '');
+
         showRoomHasPeople(rooms);
         showExceptRoom(rooms, roomStr);
 
@@ -196,6 +198,13 @@ function changeBG(url) {
     imgElm.src = url;
     imgElm.style.objectFit = 'fill';
     imgElm.style.height = 'auto';
+
+    let parentDiv = imgElm.closest('div');
+    parentDiv.innerHTML = imgElm.outerHTML;
+    let removeDiv = parentDiv.parentElement.nextElementSibling;
+    if (removeDiv) {
+        removeDiv.innerHTML = '';
+    }
 }
 
 

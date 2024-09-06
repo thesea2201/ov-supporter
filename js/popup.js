@@ -144,19 +144,17 @@ smartHideRoomsIpt.addEventListener('change', (e) => {
     hideRooms();
 });
 
-// ['keypress', 'focusout'].forEach((event) => {
-//     exceptRoomIpt.addEventListener(event, (e) => {
-//         setStatus('except-room', exceptRoomIpt.value);
-//         if (e.key == 'Enter' || event == 'focusout') {
-//             hideRooms();
-//         }
-//     })
-// })
+['keypress', 'focusout'].forEach((event) => {
+    exceptRoomIpt.addEventListener(event, (e) => {
+        setStatus('except-room', exceptRoomIpt.value);
+        hideRooms();
+    })
+})
 
 clearRoomsBtn.addEventListener('click', (e) => {
     exceptRoomIpt.value = '';
-    // setStatus('except-room', '');
-    // hideRooms();
+    setStatus('except-room', '');
+    hideRooms();
 });
 
 autoJoinRoomIpt.addEventListener('click', (e) => {
